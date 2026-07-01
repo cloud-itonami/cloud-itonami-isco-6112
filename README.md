@@ -46,6 +46,29 @@ Resolves via [`kotoba-lang/occupation`](https://github.com/kotoba-lang/occupatio
 See [`docs/business-model.md`](docs/business-model.md) and
 [`docs/operator-guide.md`](docs/operator-guide.md).
 
+## Reference implementation
+
+`src/market_garden/{store,governor}.cljc` is a minimal but real
+implementation of the Core Contract above (pure cljc, no external deps):
+
+- `market-garden.store` — `Store` protocol + `MemStore`: plots, plantings,
+  treatments, harvests. A treatment/harvest can only be recorded against a
+  registered planting on a registered plot (planting provenance).
+- `market-garden.governor` — `MarketGardenGovernor`: `assess` gates a
+  proposal against the plot/planting env. Hard invariants force `:hold`
+  (unregistered planting, direct-write instead of `:propose`, or a
+  water-source-adjacent treatment below `:high` safety-class); `:high`/
+  `:safety-critical` proposals always return `:human-approval` even when
+  every hard invariant passes; low-confidence proposals also escalate.
+
+```bash
+clojure -M:test   # 7 tests, 14 assertions, green
+```
+
+This is what backs this repo's `:maturity :implemented` entry in
+[`kotoba-lang/occupation`](https://github.com/kotoba-lang/occupation) — the
+first `cloud-itonami-isco-*` occupation to reach that tier (ADR-2607012000).
+
 ## License
 
 AGPL-3.0-or-later.
