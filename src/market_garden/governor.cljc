@@ -13,7 +13,16 @@
 
   HARD invariants for :garden/propose:
     1. Planting provenance — a treatment or harvest must reference a
-       registered planting on a registered plot.
+       registered planting on a registered plot. Checks BOTH halves
+       independently (:no-planting / :no-plot) — a planting's :plot-id is
+       caller-supplied at registration and never validated against the
+       plot store, so it can reference a plot that was never registered
+       (or was independently removed); previously only planting existence
+       was checked, and an unresolvable plot silently skipped the
+       water-source-safety check below (plot nil is neither truthy nor
+       flagged) instead of being rejected as unprovenanced. Same class of
+       gap already found and fixed in the sibling ISCO-1212/2221
+       governors (:no-employee-record / :no-patient-record).
     2. Water-source safety  — any treatment on a near-water? plot has
        safety-class at least :high, which forces human sign-off; it is never
        auto-approved.
@@ -50,6 +59,9 @@
     (cond-> []
       (nil? planting)
       (conj {:rule :no-planting :detail (str "未登録 planting " planting-id)})
+
+      (and planting (nil? plot))
+      (conj {:rule :no-plot :detail (str "未登録 plot " (:plot-id planting))})
 
       (not= :propose effect)
       (conj {:rule :no-actuation :detail "effect は :propose のみ許可（直接書込禁止）"})
