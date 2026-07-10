@@ -27,6 +27,23 @@
     (is (= :hold (:decision result)))
     (is (some #(= :no-planting (:rule %)) (:violations result)))))
 
+(deftest holds-on-orphaned-planting-with-no-plot-record
+  ;; a planting's :plot-id is caller-supplied at registration and never
+  ;; validated against the plot store, so it can reference a plot that
+  ;; was never registered. hard-violations used to check ONLY planting
+  ;; existence, so an unresolvable plot silently skipped the
+  ;; water-source-safety check entirely (plot nil is neither truthy nor
+  ;; flagged as a violation) instead of being rejected outright.
+  (let [st (store/mem-store)
+        _ (store/register-planting! st {:planting-id "orphan-p" :plot-id "no-such-plot"
+                                        :crop "tomato" :sown-at "2026-03-01"})
+        env (governor/env-for-store st)
+        proposal {:action :treat :planting-id "orphan-p" :safety-class :low
+                   :effect :propose :confidence 0.9}
+        result (governor/assess env proposal)]
+    (is (= :hold (:decision result)))
+    (is (some #(= :no-plot (:rule %)) (:violations result)))))
+
 (deftest holds-on-no-actuation-violation
   (let [st (fresh-store)
         env (governor/env-for-store st)
