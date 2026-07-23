@@ -65,9 +65,14 @@ implementation of the Core Contract above (pure cljc, no external deps):
 clojure -M:test   # 7 tests, 14 assertions, green
 ```
 
-This is what backs this repo's `:maturity :implemented` entry in
-[`kotoba-lang/occupation`](https://github.com/kotoba-lang/occupation) — the
-first `cloud-itonami-isco-*` occupation to reach that tier (ADR-2607012000).
+This repo's own `blueprint.edn` currently declares `:itonami.blueprint/maturity
+:blueprint`, not `:implemented`: `store`/`governor` are real, but there is no
+compiled `langgraph-clj` StateGraph, Advisor protocol, or audit ledger wired
+around them yet, so the actor cannot yet run an end-to-end proposal ->
+governor -> commit/hold cycle. Any `:implemented`-tier listing for this repo
+in [`kotoba-lang/occupation`](https://github.com/kotoba-lang/occupation)
+predates that correction and should be treated as stale until the missing
+StateGraph/Advisor/ledger layer is built.
 
 ## License
 
