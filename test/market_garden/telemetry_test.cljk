@@ -1,5 +1,5 @@
 (ns market-garden.telemetry-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [market-garden.store :as store]
             [market-garden.telemetry :as telemetry]))
 
